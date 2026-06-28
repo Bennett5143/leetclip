@@ -6,6 +6,7 @@ import { readdir, readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { setTimeout as sleep } from "node:timers/promises";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -30,7 +31,6 @@ const leetcode = new LeetCode(credential);
 const anthropic = new Anthropic({ apiKey });
 const turndown = new TurndownService({ headingStyle: "atx", codeBlockStyle: "fenced" });
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const run = promisify(execFile);
 
 function extractReview(content: string): string {
@@ -113,7 +113,7 @@ async function clipSubmission(
   // Ähnliche Aufgaben immer per künftigem Dateinamen [[NNN - Titel]] verlinken.
   // So wird der Link automatisch grün, sobald die Aufgabe (irgendwann) gelöst wird –
   // ohne dass diese Notiz je erneut angefasst werden muss.
-  type SimilarQuestion = { title: string; titleSlug: string; difficulty: string };
+  type SimilarQuestion = { title: string; titleSlug: string };
   const similarLinks: string[] = [];
   try {
     for (const q of JSON.parse(problem.similarQuestions) as SimilarQuestion[]) {
