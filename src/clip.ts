@@ -106,7 +106,7 @@ export async function clipSubmission(
   };
 
   await mkdir(NOTES_DIR, { recursive: true });
-  await writeFile(filePath, renderNote(data), "utf-8");
+  await writeFile(filePath, await renderNote(data), "utf-8");
   noteIndex.set(slug, safeName); // make the freshly written note available in the index
   return { skipped: false, filePath };
 }

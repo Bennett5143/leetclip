@@ -1,2 +1,6 @@
 node_modules/
 package-lock.json
+
+# Templates are rendered verbatim; keep placeholders and frontmatter untouched.
+prompts/
+templates/

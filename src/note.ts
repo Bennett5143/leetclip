@@ -1,11 +1,9 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { NOTES_DIR, TAG_PREFIX } from "./config";
+import { NOTES_DIR, TAG_PREFIX, optionalEnv } from "./config";
 
-export const HEADING_PROBLEM = "## Problem";
-export const HEADING_SOLUTION = "## My Solution";
-export const HEADING_REVIEW = "## AI Review";
-export const HEADING_SIMILAR = "## Similar Problems";
+const HEADING_SIMILAR = "## Similar Problems";
+const DEFAULT_TEMPLATE_URL = new URL("../templates/note.md", import.meta.url);
 
 // Extract the review section from an existing note. Matches both the current
 // English headings and the older German ones, so `--relink` reuses reviews
@@ -54,48 +52,45 @@ export interface NoteData {
   review: string;
 }
 
-export function renderNote(data: NoteData): string {
+// Render a note from the template. The layout and frontmatter live in
+// templates/note.md (override via NOTE_TEMPLATE_FILE) so they can be customized
+// without touching the code. Placeholders are {{key}}; the tags and similar
+// blocks are rendered here because they're conditional/list-based.
+export async function renderNote(data: NoteData): Promise<string> {
+  const template = await readFile(
+    optionalEnv("NOTE_TEMPLATE_FILE") ?? DEFAULT_TEMPLATE_URL,
+    "utf-8"
+  );
+
   // Topics go into the frontmatter as Obsidian tags (rather than a section at
   // the end). Slugs are already tag-safe (lowercase, hyphenated), e.g.
   // "hash-table".
   const tagLines = data.topicSlugs.map((slug) => `  - ${TAG_PREFIX}${slug}`).join("\n");
   const tagsBlock = tagLines ? `\ntags:\n${tagLines}` : "";
 
-  const similarSection = data.similarBasenames.length
+  const similarBlock = data.similarBasenames.length
     ? `\n\n${HEADING_SIMILAR}\n\n${data.similarBasenames.map((b) => `- [[${b}]]`).join("\n")}`
     : "";
 
-  return `---
-type: leetcode${tagsBlock}
-aliases:
-  - "${data.title}"
-number: ${data.frontendId}
-difficulty: ${data.difficulty}
-language: ${data.language}
-runtime: ${data.runtimeDisplay}
-runtime_percentile: ${data.runtimePercentile.toFixed(1)}
-memory: ${data.memoryDisplay}
-memory_percentile: ${data.memoryPercentile.toFixed(1)}
-url: https://leetcode.com/problems/${data.slug}/
-solved: ${data.solvedDate}
-related:
-  - "[[_LeetCode]]"
----
+  const values: Record<string, string> = {
+    tags: tagsBlock,
+    title: data.title,
+    number: data.frontendId,
+    difficulty: data.difficulty,
+    language: data.language,
+    runtime: data.runtimeDisplay,
+    runtimePercentile: data.runtimePercentile.toFixed(1),
+    memory: data.memoryDisplay,
+    memoryPercentile: data.memoryPercentile.toFixed(1),
+    url: `https://leetcode.com/problems/${data.slug}/`,
+    solved: data.solvedDate,
+    description: data.description,
+    code: data.code,
+    review: data.review,
+    similar: similarBlock,
+  };
 
-# #${data.frontendId} — ${data.title}
-
-${HEADING_PROBLEM}
-
-${data.description}
-
-${HEADING_SOLUTION}
-
-\`\`\`${data.language}
-${data.code}
-\`\`\`
-
-${HEADING_REVIEW}
-
-${data.review}${similarSection}
-`;
+  // Single pass so substituted content (which may itself contain "{{...}}") is
+  // never re-processed. Unknown placeholders are left untouched.
+  return template.replace(/\{\{(\w+)\}\}/g, (match, key: string) => values[key] ?? match);
 }
