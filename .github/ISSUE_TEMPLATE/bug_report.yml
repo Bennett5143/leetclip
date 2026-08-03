@@ -1,0 +1,37 @@
+name: Bug report
+description: Something isn't working as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "Do **not** paste your LEETCODE_SESSION cookie or API keys here."
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you run, what did you expect, what happened instead?
+      placeholder: "Ran `npm start two-sum`, expected a note, got ..."
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Review provider
+      options:
+        - anthropic (default)
+        - openai-compatible (Ollama / LM Studio / OpenRouter / ...)
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS & Node version
+      placeholder: "macOS 15 / Node 22.5"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error output
+      description: Paste the console output. Redact any secrets first.
+      render: shell
