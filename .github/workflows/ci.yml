@@ -16,8 +16,8 @@ permissions:
   contents: read
 
 jobs:
-  check:
-    name: Check
+  build:
+    name: Build
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -32,3 +32,18 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run format:check
+
+  # Stable status-check context ("check") that gates on the whole matrix, so
+  # branch-protection rules don't need to track individual Node versions.
+  check:
+    name: check
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify build matrix succeeded
+        run: |
+          if [ "${{ needs.build.result }}" != "success" ]; then
+            echo "build matrix did not succeed: ${{ needs.build.result }}"
+            exit 1
+          fi
