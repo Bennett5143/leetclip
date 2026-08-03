@@ -1,6 +1,7 @@
 # leetclip
 
 [![CI](https://github.com/Bennett5143/leetclip/actions/workflows/ci.yml/badge.svg)](https://github.com/Bennett5143/leetclip/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A small CLI that clips your accepted LeetCode submissions into
 [Obsidian](https://obsidian.md) notes — problem statement, your solution, an AI
@@ -82,8 +83,18 @@ REVIEW_BASE_URL=http://localhost:11434/v1
 REVIEW_MODEL=llama3
 ```
 
-The review prompt lives in [`prompts/review.md`](prompts/review.md) — edit it, or
-point `REVIEW_PROMPT_FILE` at your own, to change the review's language or style.
+## Customizing output
+
+Both the review prompt and the note layout are external templates you can edit,
+or override with your own via an environment variable:
+
+| Template      | File                                     | Override var         | Placeholders                                                                                                                                                                                                                               |
+| ------------- | ---------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Review prompt | [`prompts/review.md`](prompts/review.md) | `REVIEW_PROMPT_FILE` | `{{lang}}`, `{{description}}`, `{{code}}`                                                                                                                                                                                                  |
+| Note layout   | [`templates/note.md`](templates/note.md) | `NOTE_TEMPLATE_FILE` | `{{title}}`, `{{number}}`, `{{difficulty}}`, `{{language}}`, `{{description}}`, `{{code}}`, `{{review}}`, `{{url}}`, `{{solved}}`, `{{runtime}}`, `{{runtimePercentile}}`, `{{memory}}`, `{{memoryPercentile}}`, `{{tags}}`, `{{similar}}` |
+
+Edit `prompts/review.md` to change the review's language or style, and
+`templates/note.md` to change the frontmatter or note structure.
 
 ## License
 
