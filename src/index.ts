@@ -16,7 +16,15 @@ const reviewer = getReviewer();
 if (backfill || relink) {
   const reuseReview = relink;
   console.log("Collecting all accepted submissions ...");
-  const accepted = await collectAcceptedSubmissions(leetcode);
+  let accepted: Submission[];
+  try {
+    accepted = await collectAcceptedSubmissions(leetcode);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`Collecting submissions failed: ${msg}`);
+    console.error("This usually means your session cookie is invalid or expired.");
+    process.exit(1);
+  }
   const noteIndex = await buildNoteIndex();
   console.log(
     `${accepted.length} solved problems found. ` +
@@ -55,19 +63,28 @@ if (backfill || relink) {
 }
 
 let target: Submission | undefined;
-if (slugArg) {
-  const subs = await leetcode.submissions({ slug: slugArg, limit: 1 }).catch(() => null);
-  target = subs?.[0];
-} else {
-  const subs = await leetcode.submissions({ limit: 20 }).catch(() => null);
-  target = subs?.find((s) => s.statusDisplay === "Accepted");
+try {
+  if (slugArg) {
+    const subs = await leetcode.submissions({ slug: slugArg, limit: 1 });
+    target = subs[0];
+  } else {
+    const subs = await leetcode.submissions({ limit: 20 });
+    target = subs.find((s) => s.statusDisplay === "Accepted");
+  }
+} catch (err) {
+  // leetcode-query throws a TypeError on `submissionList` being null, which is
+  // what LeetCode's API returns for unauthenticated requests.
+  const msg = err instanceof Error ? err.message : String(err);
+  console.error(`Fetching submissions failed: ${msg}`);
+  console.error("This usually means your session cookie is invalid or expired.");
+  process.exit(1);
 }
 
 if (!target) {
   console.error(
     slugArg
-      ? `No submission found for "${slugArg}". Is the slug correct (lowercase, hyphenated)? Cookie still valid?`
-      : "No accepted submission found. Have you solved a problem, and is your cookie valid?"
+      ? `No submission found for "${slugArg}". Is the slug correct (lowercase, hyphenated)?`
+      : "No accepted submission among your 20 most recent submissions."
   );
   process.exit(1);
 }
