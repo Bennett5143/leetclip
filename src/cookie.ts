@@ -75,18 +75,60 @@ async function readSafariSession(): Promise<string | null> {
   return null;
 }
 
+// LEETCODE_SESSION is a JWT whose payload carries the session lifetime as
+// refreshed_at (epoch seconds) + _session_expiry (seconds, currently 14 days).
+// Returns null when the token can't be decoded (unknown format — assume valid).
+function sessionExpiry(session: string): Date | null {
+  try {
+    const payload = session.split(".")[1];
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
+      refreshed_at?: number;
+      _session_expiry?: number;
+    };
+    if (!data.refreshed_at || !data._session_expiry) return null;
+    return new Date((data.refreshed_at + data._session_expiry) * 1000);
+  } catch {
+    return null;
+  }
+}
+
+function isExpired(session: string): boolean {
+  const expiry = sessionExpiry(session);
+  return expiry !== null && expiry.getTime() <= Date.now();
+}
+
 // Resolve the LeetCode session cookie. Order: LEETCODE_SESSION env var (works
-// on any browser/platform), then Safari auto-read on macOS.
+// on any browser/platform), then Safari auto-read on macOS. An expired env
+// cookie is skipped with a warning instead of silently failing downstream.
 export async function resolveSession(): Promise<string> {
   const fromEnv = process.env.LEETCODE_SESSION;
-  if (fromEnv) return fromEnv;
+  if (fromEnv) {
+    const expiry = sessionExpiry(fromEnv);
+    if (!isExpired(fromEnv)) return fromEnv;
+    console.warn(
+      `LEETCODE_SESSION in your environment expired on ${expiry!.toLocaleString()}; ` +
+        "ignoring it. Remove it from .env or replace it with a fresh cookie."
+    );
+  }
 
   const safariDisabled = process.env.LEETCODE_COOKIE_SAFARI === "0";
   if (process.platform === "darwin" && !safariDisabled) {
     const value = await readSafariSession();
-    if (value) return value;
-    throw new Error(`No LEETCODE_SESSION cookie found in Safari. ${DOCS_HINT}`);
+    if (value && !isExpired(value)) return value;
+    if (value) {
+      throw new Error(
+        `The LEETCODE_SESSION cookie in Safari expired on ` +
+          `${sessionExpiry(value)!.toLocaleString()}. Log in to leetcode.com again.`
+      );
+    }
+    throw new Error(
+      `No LEETCODE_SESSION cookie found in Safari — are you logged in to leetcode.com? ${DOCS_HINT}`
+    );
   }
 
-  throw new Error(`LEETCODE_SESSION is missing. ${DOCS_HINT}`);
+  throw new Error(
+    fromEnv
+      ? `LEETCODE_SESSION has expired. ${DOCS_HINT}`
+      : `LEETCODE_SESSION is missing. ${DOCS_HINT}`
+  );
 }
