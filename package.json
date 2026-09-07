@@ -24,16 +24,16 @@
     "url": "git+https://github.com/Bennett5143/leetclip.git"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.122.0",
+    "@anthropic-ai/sdk": "^0.123.0",
     "dotenv": "^17.4.2",
     "leetcode-query": "^2.0.1",
     "turndown": "^7.2.4"
   },
   "devDependencies": {
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.4.1",
     "@types/turndown": "^5.0.6",
     "prettier": "^3.4.2",
-    "tsx": "^4.23.12",
+    "tsx": "^4.23.13",
     "typescript": "^7.0.2"
   }
 }
