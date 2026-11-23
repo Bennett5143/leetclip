@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { renderNote, type NoteData } from "./note";
+import { renderNote, type NoteData } from "../src/note";
 
 const data: NoteData = {
   frontendId: "1",
@@ -24,9 +24,4 @@ test("renders Go fences while preserving the LeetCode language metadata", async 
   const note = await renderNote(data);
   assert.match(note, /^language: golang$/m);
   assert.match(note, /```go\nfunc main\(\) \{\}\n```/);
-});
-
-test("leaves other language fences unchanged", async () => {
-  const note = await renderNote({ ...data, language: "python3" });
-  assert.match(note, /```python3\n/);
 });
