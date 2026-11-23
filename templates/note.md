@@ -23,7 +23,7 @@ related:
 
 ## My Solution
 
-```{{language}}
+```{{codeLanguage}}
 {{code}}
 ```
 
