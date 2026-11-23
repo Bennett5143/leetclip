@@ -88,10 +88,12 @@ REVIEW_MODEL=llama3
 Both the review prompt and the note layout are external templates you can edit,
 or override with your own via an environment variable:
 
-| Template      | File                                     | Override var         | Placeholders                                                                                                                                                                                                                               |
-| ------------- | ---------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Review prompt | [`prompts/review.md`](prompts/review.md) | `REVIEW_PROMPT_FILE` | `{{lang}}`, `{{description}}`, `{{code}}`                                                                                                                                                                                                  |
-| Note layout   | [`templates/note.md`](templates/note.md) | `NOTE_TEMPLATE_FILE` | `{{title}}`, `{{number}}`, `{{difficulty}}`, `{{language}}`, `{{description}}`, `{{code}}`, `{{review}}`, `{{url}}`, `{{solved}}`, `{{runtime}}`, `{{runtimePercentile}}`, `{{memory}}`, `{{memoryPercentile}}`, `{{tags}}`, `{{similar}}` |
+| Template      | File                                     | Override var         | Placeholders                                                                                                                                                                                                                                                   |
+| ------------- | ---------------------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Review prompt | [`prompts/review.md`](prompts/review.md) | `REVIEW_PROMPT_FILE` | `{{lang}}`, `{{description}}`, `{{code}}`                                                                                                                                                                                                                      |
+| Note layout   | [`templates/note.md`](templates/note.md) | `NOTE_TEMPLATE_FILE` | `{{title}}`, `{{number}}`, `{{difficulty}}`, `{{language}}`, `{{codeLanguage}}`, `{{description}}`, `{{code}}`, `{{review}}`, `{{url}}`, `{{solved}}`, `{{runtime}}`, `{{runtimePercentile}}`, `{{memory}}`, `{{memoryPercentile}}`, `{{tags}}`, `{{similar}}` |
+
+Use `{{codeLanguage}}` for code fences: it maps LeetCode's `golang` to `go` for syntax highlighting. `{{language}}` retains the original LeetCode value. Custom note templates should use `{{codeLanguage}}` in their code fences as well.
 
 Edit `prompts/review.md` to change the review's language or style, and
 `templates/note.md` to change the frontmatter or note structure.

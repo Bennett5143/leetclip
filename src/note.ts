@@ -78,6 +78,7 @@ export async function renderNote(data: NoteData): Promise<string> {
     number: data.frontendId,
     difficulty: data.difficulty,
     language: data.language,
+    codeLanguage: data.language === "golang" ? "go" : data.language,
     runtime: data.runtimeDisplay,
     runtimePercentile: data.runtimePercentile.toFixed(1),
     memory: data.memoryDisplay,
