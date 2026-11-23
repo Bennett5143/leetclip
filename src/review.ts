@@ -5,7 +5,7 @@ import { optionalEnv, requireEnv } from "./config";
 export type Reviewer = (prompt: string) => Promise<string>;
 
 const MAX_TOKENS = 2048;
-const DEFAULT_MODEL = "claude-opus-5";
+const DEFAULT_MODEL = "claude-sonnet-5-5";
 const DEFAULT_PROMPT_URL = new URL("../prompts/review.md", import.meta.url);
 
 // The client and env vars are resolved lazily, on the first actual review, so
