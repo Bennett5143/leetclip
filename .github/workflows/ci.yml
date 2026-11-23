@@ -31,6 +31,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      - run: npm test
       - run: npm run format:check
 
   # Stable status-check context ("check") that gates on the whole matrix, so

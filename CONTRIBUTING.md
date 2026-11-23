@@ -14,11 +14,11 @@ Requires Node.js 22+.
 
 ## Before opening a pull request
 
-- `npm run typecheck` passes
+- `npm test` and `npm run typecheck` pass
 - `npm run format` (Prettier) leaves no changes
 - Keep changes focused; describe the "why" in the PR
 
-CI runs typecheck + format check on Node 22 and 24, and `main` requires a green
+CI runs tests, typecheck and format check on Node 22 and 24, and `main` requires a green
 build. Merges are squash-only.
 
 ## Reporting bugs

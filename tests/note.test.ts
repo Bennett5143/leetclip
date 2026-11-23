@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { renderNote, type NoteData } from "../src/note";
+import type { NoteData } from "../src/note";
+
+process.env.LEETCODE_NOTES_DIR = "/unused";
+const { renderNote, extractReview } = await import("../src/note");
 
 const data: NoteData = {
   frontendId: "1",
@@ -19,6 +22,20 @@ const data: NoteData = {
   code: "func main() {}",
   review: "Review",
 };
+
+test("extracts English and legacy German reviews without following sections", () => {
+  for (const [heading, next] of [
+    ["AI Review", "Similar Problems"],
+    ["KI-Review", "Ähnliche Aufgaben"],
+    ["KI-Review", "Themen"],
+  ]) {
+    assert.equal(
+      extractReview(`## ${heading}\n\nKeep this review\n\n## ${next}\n\nExclude this`),
+      "Keep this review"
+    );
+  }
+  assert.equal(extractReview("## Problem\nNo review here"), "");
+});
 
 test("renders Go fences while preserving the LeetCode language metadata", async () => {
   const note = await renderNote(data);
